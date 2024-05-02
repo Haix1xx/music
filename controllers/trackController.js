@@ -11,7 +11,7 @@ exports.getAllTracks = factory.getAll(TrackModel);
 exports.getTrack = factory.getOne(TrackModel);
 
 exports.getTracksByAlbum = catchAsync(async (req, res, next) => {
-    const albumId = req.params.albumId;
+    const albumId = req.params.id;
 
     const data = await trackService.getTracksByAlbum(albumId);
     res.status(200).json({
@@ -59,6 +59,17 @@ exports.createTrack = catchAsync(async (req, res, next) => {
     req.body.url = audioResult.Location;
     const data = await trackService.createTrack(req.body);
     res.status(201).json({
+        status: 'success',
+        data: data,
+    });
+});
+
+exports.createTrackAndAddToAlbum = catchAsync(async (req, res, next) => {
+    const { albumId } = req.params.id;
+
+    const data = await trackService.addTrackToAbum(req.body, albumId);
+
+    res.status(200).json({
         status: 'success',
         data: data,
     });

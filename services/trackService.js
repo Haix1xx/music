@@ -3,6 +3,7 @@ const TrackGenreModel = require('./../models/trackGenreModel');
 const AppError = require('./../utils/appError');
 const APIFeatures = require('./../utils/apiFeatures');
 const AlbumModel = require('../models/albumModel');
+const SingleModel = require('./../models/singleModel');
 
 exports.createTrack = (data) => {
     return new Promise(async (resolve, reject) => {
@@ -22,21 +23,41 @@ exports.createTrack = (data) => {
                 copyRight,
                 publishRight,
                 genres,
+                album,
             } = data;
-            const track = await TrackModel.create({
-                title: title,
-                url: url,
-                coverPath: coverPath,
-                releaseDate: releaseDate,
-                isPublic: isPublic,
-                duration: duration,
-                artist: user,
-                writtenBy: writtenBy,
-                producedBy: producedBy,
-                source: source,
-                copyRight: copyRight,
-                publishRight: publishRight,
-            });
+            let track = '';
+            if (album) {
+                track = await TrackModel.create({
+                    title: title,
+                    url: url,
+                    coverPath: coverPath,
+                    releaseDate: releaseDate,
+                    isPublic: isPublic,
+                    duration: duration,
+                    artist: user,
+                    writtenBy: writtenBy,
+                    producedBy: producedBy,
+                    source: source,
+                    copyRight: copyRight,
+                    publishRight: publishRight,
+                    album: album,
+                });
+            } else {
+                track = await TrackModel.create({
+                    title: title,
+                    url: url,
+                    coverPath: coverPath,
+                    releaseDate: releaseDate,
+                    isPublic: isPublic,
+                    duration: duration,
+                    artist: user,
+                    writtenBy: writtenBy,
+                    producedBy: producedBy,
+                    source: source,
+                    copyRight: copyRight,
+                    publishRight: publishRight,
+                });
+            }
             if (!track) {
                 return reject(
                     new AppError('An error occured while creating a track', 403)
@@ -54,9 +75,31 @@ exports.createTrack = (data) => {
 
                 await Promise.all(promises);
             }
+            let updatedAlbum;
+            let single;
+            if (album) {
+                const existingAlbum = await AlbumModel.findById(album);
 
+                let { tracks } = existingAlbum;
+                tracks.push({ order: tracks.length, track: track.id });
+
+                updatedAlbum = await AlbumModel.findByIdAndUpdate(album, {
+                    tracks: tracks,
+                });
+                console.log(updatedAlbum);
+            } else {
+                single = await SingleModel.create({
+                    track: track.id,
+                    artist: user,
+                });
+            }
             resolve({
-                data: track,
+                data: {
+                    track,
+                    album: updatedAlbum,
+                    single: single,
+                    type: album ? 'album' : 'single',
+                },
             });
         } catch (err) {
             reject(err);
@@ -101,12 +144,46 @@ exports.getTracksByAlbum = (albumId) => {
                 return reject(new AppError('You do not pass a album id', 403));
             }
 
-            const tracks = await AlbumModel.findById(albumId).populate(
-                'tracks.track'
-            );
+            const tracks = await AlbumModel.findById(albumId)
+                .populate({
+                    path: 'artist',
+                    populate: 'profile',
+                })
+                .populate({
+                    path: 'tracks',
+                    populate: 'track',
+                });
 
             resolve({
                 data: tracks,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+exports.addTrackToAbum = (data, albumId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const track = await this.createTrack(data);
+
+            const album = await AlbumModel.findById(albumId);
+
+            let { tracks } = album;
+            console.log(tracks);
+            tracks.push({ order: tracks.length, track: track.id });
+
+            const updatedAlbum = await AlbumModel.findByIdAndUpdate(
+                albumId,
+                tracks
+            );
+            console.log(updatedAlbum);
+            resolve({
+                data: {
+                    updatedAlbum,
+                    track,
+                },
             });
         } catch (err) {
             reject(err);

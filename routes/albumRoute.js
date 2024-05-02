@@ -8,13 +8,17 @@ const router = express.Router();
 
 router
     .route('/')
-    .get(albumController.getAlbum)
     .post(
         authController.protect,
-        authController.restrictTo('admin,artist'),
+        authController.restrictTo('artist'),
         albumController.createAlbum
     );
 
-router.route('/:id/tracks').get(trackController.getTracksByAlbum);
+router.route('/:id').get(albumController.getAlbum);
+
+router
+    .route('/:id/tracks')
+    .get(trackController.getTracksByAlbum)
+    .patch(albumController.updateTracksToAlbum);
 
 module.exports = router;

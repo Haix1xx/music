@@ -2,6 +2,27 @@ const AlbumModel = require('./../models/albumModel');
 const AppError = require('./../utils/appError');
 const APIFeatures = require('./../utils/apiFeatures');
 
+exports.createAlbum = (data, artistId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const { title, releaseDate, coverPath } = data;
+
+            const album = await AlbumModel.create({
+                artist: artistId,
+                coverPath: coverPath,
+                title: title,
+                releaseDate: releaseDate,
+            });
+
+            resolve({
+                data: album,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
 exports.getAlbumsByArtist = (artistId, query) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -27,5 +48,25 @@ exports.getAlbumsByArtist = (artistId, query) => {
         } catch (err) {
             reject(err);
         }
+    });
+};
+
+exports.updateTracksToAlbum = (albumId, data) => {
+    return new Promise(async (resovle, reject) => {
+        const { tracks } = data;
+        if (!albumId) {
+            return reject(new AppError('Missing album id', 403));
+        }
+
+        if (!tracks) {
+            return reject(new AppError('Tracks are empty', 403));
+        }
+        const album = await AlbumModel.findByIdAndUpdate(albumId, {
+            tracks: tracks,
+        });
+
+        resovle({
+            data: album,
+        });
     });
 };
