@@ -85,6 +85,9 @@ app.use(xss());
 //create a bucket
 
 // 3) ROUTES
+app.use('/healthcheck', (req, res, next) => {
+    res.status(200).json('hello world');
+});
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/tracks', trackRouter);
 app.use('/api/v1/genres', genreRouter);
