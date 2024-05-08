@@ -190,3 +190,51 @@ exports.addTrackToAbum = (data, albumId) => {
         }
     });
 };
+
+exports.updateTrack = (trackId, data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!trackId) {
+                return reject(new AppError('Missing track id', 403));
+            }
+
+            const {
+                title,
+                coverPath,
+                isPublic,
+                writtenBy,
+                producedBy,
+                source,
+                copyRight,
+                publishRight,
+            } = data;
+
+            const track = await TrackModel.findByIdAndUpdate(
+                trackId,
+                {
+                    title: title,
+                    source: source,
+                    coverPath: coverPath,
+                    isPublic: isPublic,
+                    writtenBy: writtenBy,
+                    producedBy: producedBy,
+                    copyRight: copyRight,
+                    publishRight: publishRight,
+                },
+                { new: true }
+            ).populate({
+                path: 'artist',
+                populate: 'profile',
+            });
+            if (!track) {
+                return reject(new AppError(`Track not found`, 404));
+            }
+
+            return resolve({
+                data: track,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};

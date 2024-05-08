@@ -3,12 +3,14 @@ const factory = require('./handlerFactory');
 const trackService = require('./../services/trackService');
 const catchAsync = require('./../utils/catchAsync');
 const { s3UploadFile } = require('./../utils/s3Services');
-const { uploadImageToCloudinary } = require('./../utils/cloudinaryServices');
-const { getAudioDuration } = require('./../utils/fileServices');
 
 exports.getAllTracks = factory.getAll(TrackModel);
 
-exports.getTrack = factory.getOne(TrackModel);
+exports.getTrack = factory.getOne(TrackModel, {
+    path: 'artist',
+    select: 'profile email _id id',
+    populate: 'profile',
+});
 
 exports.getTracksByAlbum = catchAsync(async (req, res, next) => {
     const albumId = req.params.id;
@@ -69,6 +71,15 @@ exports.createTrackAndAddToAlbum = catchAsync(async (req, res, next) => {
 
     const data = await trackService.addTrackToAbum(req.body, albumId);
 
+    res.status(200).json({
+        status: 'success',
+        data: data,
+    });
+});
+
+exports.updateTrack = catchAsync(async (req, res, next) => {
+    const trackId = req.params.id;
+    const data = await trackService.updateTrack(trackId, req.body);
     res.status(200).json({
         status: 'success',
         data: data,

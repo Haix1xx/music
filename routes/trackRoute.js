@@ -20,6 +20,9 @@ router
         trackController.createTrack
     );
 
-router.route('/:id').get(trackController.getTrack);
+router
+    .route('/:id')
+    .get(trackController.getTrack)
+    .patch(trackController.updateTrack);
 
 module.exports = router;

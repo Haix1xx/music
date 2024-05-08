@@ -19,6 +19,7 @@ const genreRouter = require('./routes/genreRoute');
 const streamRouter = require('./routes/streamRoute');
 const albumRouter = require('./routes/albumRoute');
 const artistRouter = require('./routes/artistRoute');
+const searchRouter = require('./routes/searchRoute');
 
 const cors = require('cors');
 
@@ -94,6 +95,7 @@ app.use('/api/v1/genres', genreRouter);
 app.use('/api/v1/streams', streamRouter);
 app.use('/api/v1/albums', albumRouter);
 app.use('/api/v1/artists', artistRouter);
+app.use('/api/v1/search', searchRouter);
 // app.post('/upload', upload.array('file'), async (req, res) => {
 //     const file = req.files[0];
 //     const result = await s3UploadFile(file);
