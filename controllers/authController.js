@@ -167,7 +167,7 @@ exports.artistSignup = catchAsync(async (req, res) => {
 exports.login = catchAsync(async (req, res, next) => {
     const { email, password } = req.body;
     const user = await authService.login({ email, password });
-    await createSendToken(user, 200, res);
+    await createSendToken(user, 200, res, '30d');
 });
 
 exports.logout = (req, res) => {
