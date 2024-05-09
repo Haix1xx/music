@@ -3,6 +3,11 @@ const ProfileModel = require('./profileModel');
 
 const artistProfileSchema = new Schema(
     {
+        displayname: {
+            type: String,
+            maxLength: 64,
+            trim: true,
+        },
         bio: {
             type: String,
             maxLength: 4096 * 2,

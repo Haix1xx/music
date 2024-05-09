@@ -8,6 +8,7 @@ const router = express.Router();
 
 router
     .route('/')
+    .get(albumController.getAllAlbums)
     .post(
         authController.protect,
         authController.restrictTo('artist'),

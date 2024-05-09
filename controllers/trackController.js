@@ -4,7 +4,11 @@ const trackService = require('./../services/trackService');
 const catchAsync = require('./../utils/catchAsync');
 const { s3UploadFile } = require('./../utils/s3Services');
 
-exports.getAllTracks = factory.getAll(TrackModel);
+exports.getAllTracks = factory.getAll(TrackModel, {
+    path: 'artist',
+    select: 'profile email _id id',
+    populate: 'profile',
+});
 
 exports.getTrack = factory.getOne(TrackModel, {
     path: 'artist',

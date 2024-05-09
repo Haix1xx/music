@@ -3,6 +3,11 @@ const factory = require('./handlerFactory');
 const albumSerivce = require('./../services/albumService');
 const catchAsync = require('./../utils/catchAsync');
 
+exports.getAllAlbums = factory.getAll(AlbumModel, {
+    path: 'artist',
+    populate: 'profile',
+});
+
 exports.getAlbum = factory.getOne(AlbumModel, {
     path: 'artist',
     populate: 'profile',

@@ -123,7 +123,11 @@ exports.getTracksByArtist = (artistId, query) => {
                 .limitFields()
                 .paginate();
 
-            features.query = features.query.populate('artist collaborators');
+            features.query = features.query.populate({
+                path: 'artist',
+                select: 'id _id email role profile',
+                populate: 'profile',
+            });
 
             const tracks = await features.query;
             const total = await TrackModel.countDocuments({ artist: artistId });

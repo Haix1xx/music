@@ -141,6 +141,11 @@ exports.artistSignUp = (data) => {
                     verifyToken: verifyToken,
                 });
 
+                let { displayname } = data;
+                if (!displayname) {
+                    displayname = `${data.firstname} ${data.lastname}`;
+                }
+
                 const artistProfile = await ArtistProfileModel.create({
                     firstname: data.firstname,
                     lastname: data.lastname,
@@ -149,6 +154,7 @@ exports.artistSignUp = (data) => {
                     bio: data.bio,
                     birthday: data.birthday,
                     user: user.id,
+                    displayname: displayname,
                 });
                 // const url = `${process.env.CLIENT_URL}/verify/${user._id}/${verifyToken}`;
                 // await sendEmail(user.email, 'Email Verification', url);

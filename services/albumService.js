@@ -30,7 +30,11 @@ exports.getAlbumsByArtist = (artistId, query) => {
                 return reject(new AppError('You need to pass artist id', 403));
             }
             const features = new APIFeatures(
-                AlbumModel.find({ artist: artistId }).populate('artist'),
+                AlbumModel.find({ artist: artistId }).populate({
+                    path: 'artist',
+                    select: 'id _id email role profile',
+                    populate: 'profile',
+                }),
                 query
             )
                 .filter()
