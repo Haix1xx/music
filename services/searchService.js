@@ -80,3 +80,34 @@ exports.search = (searchText, query) => {
         }
     });
 };
+
+exports.searchTrack = (searchText, query) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!searchText) {
+                return reject(new AppError('Empty search text'));
+            }
+
+            //search tracks
+            const trackFeature = new APIFeatures(
+                TrackModel.find({
+                    title: { $regex: searchText, $options: 'i' },
+                }).populate({
+                    path: 'artist',
+                    populate: 'profile',
+                }),
+                query
+            )
+                .sort()
+                .paginate();
+
+            const tracks = await trackFeature.query;
+
+            resolve({
+                tracks,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};

@@ -4,6 +4,7 @@ const AppError = require('./../utils/appError');
 const APIFeatures = require('./../utils/apiFeatures');
 const AlbumModel = require('../models/albumModel');
 const SingleModel = require('./../models/singleModel');
+const FeaturedPlaylistModel = require('./../models/featuredPlaylist');
 
 exports.createTrack = (data) => {
     return new Promise(async (resolve, reject) => {
@@ -158,6 +159,37 @@ exports.getTracksByAlbum = (albumId) => {
                     populate: 'track',
                 });
 
+            if (!tracks) {
+                reject(new AppError('Album not found', 404));
+            }
+            resolve({
+                data: tracks,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+exports.getTracksByFPlaylist = (playlistId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!playlistId) {
+                return reject(
+                    new AppError('You do not pass a playlist id', 403)
+                );
+            }
+
+            const tracks = await FeaturedPlaylistModel.findById(
+                playlistId
+            ).populate({
+                path: 'tracks',
+                populate: {
+                    path: 'track',
+                    populate: 'artist',
+                },
+            });
+
             resolve({
                 data: tracks,
             });
@@ -173,9 +205,11 @@ exports.addTrackToAbum = (data, albumId) => {
             const track = await this.createTrack(data);
 
             const album = await AlbumModel.findById(albumId);
-
+            if (!album) {
+                return reject(new AppError('Album not found', 404));
+            }
             let { tracks } = album;
-            console.log(tracks);
+
             tracks.push({ order: tracks.length, track: track.id });
 
             const updatedAlbum = await AlbumModel.findByIdAndUpdate(
@@ -195,6 +229,35 @@ exports.addTrackToAbum = (data, albumId) => {
     });
 };
 
+exports.AddTrackToPlaylist = (playlistId, data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!playlistId) {
+                return reject(new AppError('Missing playlist id', 403));
+            }
+
+            const playlist = await FeaturedPlaylistModel.findById(playlistId);
+            if (!playlist) {
+                return reject(new AppError('Playlist not found', 404));
+            }
+
+            let { tracks } = playlist;
+
+            const updatedPlaylist =
+                await FeaturedPlaylistModel.findByIdAndUpdate(playlistId, {
+                    tracks: tracks,
+                });
+
+            console.log(updatedPlaylist);
+
+            resolve({
+                data: updatedPlaylist,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
 exports.updateTrack = (trackId, data) => {
     return new Promise(async (resolve, reject) => {
         try {

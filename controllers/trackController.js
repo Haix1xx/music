@@ -26,6 +26,15 @@ exports.getTracksByAlbum = catchAsync(async (req, res, next) => {
     });
 });
 
+exports.getTracksByPlaylist = catchAsync(async (req, res, next) => {
+    const playlistId = req.params.id;
+
+    const data = await trackService.getTracksByFPlaylist(playlistId);
+    res.status(200).json({
+        status: 'success',
+        data: data,
+    });
+});
 exports.getTracksByArtist = catchAsync(async (req, res, next) => {
     const artistId = req.params.id;
     const data = await trackService.getTracksByArtist(artistId, req.query);
