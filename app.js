@@ -21,6 +21,7 @@ const albumRouter = require('./routes/albumRoute');
 const artistRouter = require('./routes/artistRoute');
 const searchRouter = require('./routes/searchRoute');
 const featuredPlaylistRouter = require('./routes/featuredPlaylistRoute');
+const meRouter = require('./routes/meRoute');
 
 const cors = require('cors');
 
@@ -98,6 +99,7 @@ app.use('/api/v1/albums', albumRouter);
 app.use('/api/v1/artists', artistRouter);
 app.use('/api/v1/search', searchRouter);
 app.use('/api/v1/f-playlists', featuredPlaylistRouter);
+app.use('/api/v1/me', meRouter);
 // app.post('/upload', upload.array('file'), async (req, res) => {
 //     const file = req.files[0];
 //     const result = await s3UploadFile(file);

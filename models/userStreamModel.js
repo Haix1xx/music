@@ -7,6 +7,7 @@ const userStreamSchema = new Schema({
     },
     track: {
         type: Schema.Types.ObjectId,
+        ref: 'Track',
         required: [true, 'track is required'],
     },
     streamedAt: {

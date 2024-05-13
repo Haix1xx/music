@@ -98,3 +98,13 @@ exports.updateTrack = catchAsync(async (req, res, next) => {
         data: data,
     });
 });
+
+exports.getTopTracks = catchAsync(async (req, res, next) => {
+    res.query.sort = 'totalStreams';
+    const data = await trackService.getTopTracks(res.query);
+
+    res.status(200).json({
+        status: 'success',
+        data,
+    });
+});
