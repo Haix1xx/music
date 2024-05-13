@@ -5,6 +5,7 @@ const userController = require('./../controllers/userController');
 const meController = require('./../controllers/meController');
 const router = express.Router();
 
+router.route('/').get(authController.protect, meController.getMyProfile);
 router
     .route('/recently-played')
     .get(authController.protect, meController.getRecentlyPlayed);
