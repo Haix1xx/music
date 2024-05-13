@@ -5,7 +5,7 @@ const APIFeatures = require('./../utils/apiFeatures');
 const AlbumModel = require('../models/albumModel');
 const SingleModel = require('./../models/singleModel');
 const FeaturedPlaylistModel = require('./../models/featuredPlaylist');
-const userStreamModel = require('./../models/userStreamModel');
+const UserModel = require('./../models/userModel');
 const UserStreamModel = require('./../models/userStreamModel');
 
 exports.createTrack = (data) => {
@@ -308,6 +308,41 @@ exports.updateTrack = (trackId, data) => {
     });
 };
 
+// exports.getRecentlyPlayed = (userId, query) => {
+//     return new Promise(async (resolve, reject) => {
+//         try {
+//             if (!userId) {
+//                 return reject(new AppError('Missing user id', 403));
+//             }
+
+//             const features = new APIFeatures(
+//                 UserStreamModel.find({ user: userId }).populate({
+//                     path: 'track',
+//                     populate: {
+//                         path: 'artist',
+//                         populate: 'profile',
+//                     },
+//                 }),
+//                 query
+//             )
+//                 .sort()
+//                 .paginate();
+
+//             const tracks = await features.query;
+
+//             const data = tracks.map((item) => ({
+//                 track: item.track,
+//                 streamedAt: item.streamedAt,
+//             }));
+//             resolve({
+//                 data: data,
+//             });
+//         } catch (err) {
+//             reject(err);
+//         }
+//     });
+// };
+
 exports.getRecentlyPlayed = (userId, query) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -315,27 +350,81 @@ exports.getRecentlyPlayed = (userId, query) => {
                 return reject(new AppError('Missing user id', 403));
             }
 
-            const features = new APIFeatures(
-                UserStreamModel.find({ user: userId }).populate({
-                    path: 'track',
-                    populate: {
-                        path: 'artist',
-                        populate: 'profile',
+            const tracks = await UserStreamModel.aggregate([
+                {
+                    $match: { user: userId },
+                },
+                {
+                    $sort: { streamedAt: -1 },
+                },
+                {
+                    $group: {
+                        _id: '$track',
+                        track: { $first: '$$ROOT' },
                     },
-                }),
-                query
-            )
-                .sort()
-                .paginate();
+                },
+                {
+                    $replaceRoot: { newRoot: '$track' },
+                },
+                {
+                    $sort: { streamedAt: -1 },
+                },
+                {
+                    $lookup: {
+                        from: 'tracks',
+                        localField: 'track',
+                        foreignField: '_id',
+                        as: 'track',
+                    },
+                },
+                {
+                    $unwind: '$track',
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'track.artist',
+                        foreignField: '_id',
+                        as: 'track.artist',
+                    },
+                },
+                {
+                    $unwind: '$track.artist',
+                },
+                // exclude sensitive fields
+                {
+                    $project: {
+                        'track.artist.password': 0,
+                        'track.artist.passwordConfirm': 0,
+                        'track.artist.refreshToken': 0,
+                        'track.artist.verifyToken': 0,
+                    },
+                },
+                {
+                    $limit: Number(query?.limit) ?? 5,
+                },
+            ]);
 
-            const tracks = await features.query;
+            // populate profile
+            const populatedTracks = await Promise.all(
+                tracks.map(async (item) => {
+                    const artistWithProfile = await UserModel.findById(
+                        item.track.artist._id
+                    )
+                        .populate('profile')
+                        .exec();
 
-            const data = tracks.map((item) => ({
-                track: item.track,
-                streamedAt: item.streamedAt,
-            }));
+                    item.track.artist.profile = artistWithProfile.profile;
+
+                    return item;
+                })
+            );
+
             resolve({
-                data: data,
+                data: populatedTracks.map((item) => ({
+                    track: item.track,
+                    streamedAt: item.streamedAt,
+                })),
             });
         } catch (err) {
             reject(err);
