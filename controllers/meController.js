@@ -1,7 +1,7 @@
 const trackService = require('./../services/trackService');
 const userService = require('./../services/userService');
 const catchAsync = require('./../utils/catchAsync');
-
+const UserStreamModel = require('./../models/userStreamModel');
 exports.getRecentlyPlayed = catchAsync(async (req, res, next) => {
     const userId = req.user._id;
     req.query.sort = '-streamedAt';

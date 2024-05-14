@@ -10,70 +10,70 @@ exports.search = (searchText, query) => {
                 return reject(new AppError('Empty search text'));
             }
 
-            //search artists
-            const regex = new RegExp(searchText, 'i');
-            const artistFeature = new APIFeatures(
-                ArtistProfileModel.find({
-                    $or: [
-                        {
-                            $expr: {
-                                $regexMatch: {
-                                    input: {
-                                        $concat: [
-                                            { $ifNull: ['$firstname', ''] }, // Handle potential null values
-                                            ' ',
-                                            { $ifNull: ['$lastname', ''] },
-                                        ],
-                                    },
-                                    regex: regex.source,
-                                    options: 'i',
-                                },
-                            },
-                        },
-                        { bio: { $regex: regex } },
-                    ],
-                }),
-                query
-            )
-                .sort()
-                .paginate();
-            //search tracks
-            const trackFeature = new APIFeatures(
-                TrackModel.find({
-                    title: { $regex: searchText, $options: 'i' },
-                }).populate({
-                    path: 'artist',
-                    populate: 'profile',
-                }),
-                query
-            )
-                .sort()
-                .paginate();
+            // //search artists
+            // const regex = new RegExp(searchText, 'i');
+            // const artistFeature = new APIFeatures(
+            //     ArtistProfileModel.find({
+            //         $or: [
+            //             {
+            //                 $expr: {
+            //                     $regexMatch: {
+            //                         input: {
+            //                             $concat: [
+            //                                 { $ifNull: ['$firstname', ''] }, // Handle potential null values
+            //                                 ' ',
+            //                                 { $ifNull: ['$lastname', ''] },
+            //                             ],
+            //                         },
+            //                         regex: regex.source,
+            //                         options: 'i',
+            //                     },
+            //                 },
+            //             },
+            //             { bio: { $regex: regex } },
+            //         ],
+            //     }),
+            //     query
+            // )
+            //     .sort()
+            //     .paginate();
+            // //search tracks
+            // const trackFeature = new APIFeatures(
+            //     TrackModel.find({
+            //         title: { $regex: searchText, $options: 'i' },
+            //     }).populate({
+            //         path: 'artist',
+            //         populate: 'profile',
+            //     }),
+            //     query
+            // )
+            //     .sort()
+            //     .paginate();
 
-            //search albums
-            const albumFeature = new APIFeatures(
-                AlbumModel.find({
-                    title: { $regex: searchText, $options: 'i' },
-                }).populate({
-                    path: 'artist',
-                    select: 'profile email id _id',
-                    populate: 'profile',
-                }),
-                query
-            )
-                .sort()
-                .paginate();
+            // //search albums
+            // const albumFeature = new APIFeatures(
+            //     AlbumModel.find({
+            //         title: { $regex: searchText, $options: 'i' },
+            //     }).populate({
+            //         path: 'artist',
+            //         select: 'profile email id _id',
+            //         populate: 'profile',
+            //     }),
+            //     query
+            // )
+            //     .sort()
+            //     .paginate();
 
             const [artists, tracks, albums] = await Promise.all([
-                artistFeature.query,
-                trackFeature.query,
-                albumFeature.query,
+                searchArtist(searchText, query),
+                searchTrack(searchText, query),
+                searchAlbum(searchText, query),
             ]);
 
             resolve({
-                artists,
-                tracks,
-                albums,
+                artists: artists.artists,
+                tracks: tracks.tracks,
+                albums: albums.albums,
             });
         } catch (err) {
             reject(err);
@@ -81,7 +81,7 @@ exports.search = (searchText, query) => {
     });
 };
 
-exports.searchTrack = (searchText, query) => {
+const searchTrack = (searchText, query) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!searchText) {
@@ -111,3 +111,86 @@ exports.searchTrack = (searchText, query) => {
         }
     });
 };
+
+exports.searchTrack = searchTrack;
+const searchAlbum = (searchText, query) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!searchText) {
+                return reject(new AppError('Empty search text'));
+            }
+
+            //search albums
+            const albumFeature = new APIFeatures(
+                AlbumModel.find({
+                    title: { $regex: searchText, $options: 'i' },
+                }).populate({
+                    path: 'artist',
+                    select: 'profile email id _id',
+                    populate: 'profile',
+                }),
+                query
+            )
+                .sort()
+                .paginate();
+
+            const albums = await albumFeature.query;
+
+            resolve({
+                albums,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+exports.searchAlbum = searchAlbum;
+
+const searchArtist = (searchText, query) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!searchText) {
+                return reject(new AppError('Empty search text'));
+            }
+
+            //search artists
+            const regex = new RegExp(searchText, 'i');
+            const artistFeature = new APIFeatures(
+                ArtistProfileModel.find({
+                    $or: [
+                        {
+                            $expr: {
+                                $regexMatch: {
+                                    input: {
+                                        $concat: [
+                                            { $ifNull: ['$firstname', ''] }, // Handle potential null values
+                                            ' ',
+                                            { $ifNull: ['$lastname', ''] },
+                                        ],
+                                    },
+                                    regex: regex.source,
+                                    options: 'i',
+                                },
+                            },
+                        },
+                        { bio: { $regex: regex } },
+                    ],
+                }),
+                query
+            )
+                .sort()
+                .paginate();
+
+            const artists = await artistFeature.query;
+
+            resolve({
+                artists,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+exports.searchArtist = searchArtist;

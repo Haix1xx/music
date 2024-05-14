@@ -8,7 +8,11 @@ exports.search = catchAsync(async (req, res, next) => {
             promise = searchService.searchTrack(q, req.query);
             break;
         case 'album':
+            promise = searchService.searchAlbum(q, req.query);
+            break;
         case 'artist':
+            promise = searchService.searchArtist(q, req.query);
+            break;
         default:
             promise = searchService.search(q, req.query);
     }
