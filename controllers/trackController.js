@@ -101,8 +101,20 @@ exports.updateTrack = catchAsync(async (req, res, next) => {
 
 exports.getTopTracks = catchAsync(async (req, res, next) => {
     res.query.sort = 'totalStreams';
-    const data = await trackService.getTopTracks(res.query);
+    const data = await trackService.getTopTracks(req.user._id, res.query);
 
+    res.status(200).json({
+        status: 'success',
+        data,
+    });
+});
+
+exports.getArtistTopTrack = catchAsync(async (req, res, next) => {
+    req.query.sort = 'totalStreams';
+    const data = await trackService.getArtistTopTracks(
+        req.params.id,
+        req.query
+    );
     res.status(200).json({
         status: 'success',
         data,

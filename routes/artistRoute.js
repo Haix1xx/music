@@ -11,6 +11,7 @@ const router = express.Router();
 router.route('/').get(artistController.getAllArtists);
 router.route('/:id').get(artistController.getArtist);
 router.route('/:id/tracks').get(trackController.getTracksByArtist);
+router.route('/:id/top-tracks').get(trackController.getArtistTopTrack);
 router.route('/:id/albums').get(albumController.getAlbumsByArtist);
 router.route('/:id/singles').get(singleController.getSinglesByArtist);
 module.exports = router;

@@ -7,6 +7,7 @@ const SingleModel = require('./../models/singleModel');
 const FeaturedPlaylistModel = require('./../models/featuredPlaylist');
 const UserModel = require('./../models/userModel');
 const UserStreamModel = require('./../models/userStreamModel');
+const { SageMakerFeatureStoreRuntime } = require('aws-sdk');
 
 exports.createTrack = (data) => {
     return new Promise(async (resolve, reject) => {
@@ -473,6 +474,27 @@ exports.getTopTracks = (userId, query, dateCount = 10) => {
             );
             resolve({
                 data: topTracks,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+exports.getArtistTopTracks = (artistId, query) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            query.sort = 'totalStreams';
+            const features = new APIFeatures(
+                TrackModel.find({ artist: artistId }),
+                query
+            )
+                .sort()
+                .paginate();
+
+            const tracks = await features.query;
+            resolve({
+                data: tracks,
             });
         } catch (err) {
             reject(err);
