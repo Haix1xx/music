@@ -159,7 +159,13 @@ exports.getTracksByAlbum = (albumId) => {
                 })
                 .populate({
                     path: 'tracks',
-                    populate: 'track',
+                    populate: {
+                        path: 'track',
+                        populate: {
+                            path: 'artist',
+                            populate: 'profile',
+                        },
+                    },
                 });
 
             if (!tracks) {
