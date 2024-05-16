@@ -50,7 +50,7 @@ const searchTrack = (searchText, query) => {
             const tracks = await trackFeature.query;
 
             resolve({
-                tracks,
+                tracks: tracks.map((item) => ({ ...item._doc, type: 'track' })),
             });
         } catch (err) {
             reject(err);
@@ -84,7 +84,7 @@ const searchAlbum = (searchText, query) => {
             const albums = await albumFeature.query;
 
             resolve({
-                albums,
+                albums: albums.map((item) => ({ ...item._doc, type: 'album' })),
             });
         } catch (err) {
             reject(err);
@@ -130,9 +130,11 @@ const searchArtist = (searchText, query) => {
                 .paginate();
 
             const artists = await artistFeature.query;
-
             resolve({
-                artists,
+                artists: artists.map((item) => ({
+                    ...item._doc,
+                    type: 'artist',
+                })),
             });
         } catch (err) {
             reject(err);
