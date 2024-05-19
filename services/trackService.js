@@ -400,8 +400,42 @@ exports.getRecentlyPlayed = (userId, query) => {
                         as: 'track.artist',
                     },
                 },
+
                 {
                     $unwind: '$track.artist',
+                },
+                {
+                    $lookup: {
+                        from: 'albums',
+                        localField: 'track.album',
+                        foreignField: '_id',
+                        as: 'track.album',
+                    },
+                },
+                {
+                    $unwind: '$track.album',
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'track.album.artist',
+                        foreignField: '_id',
+                        as: 'track.album.artist',
+                    },
+                },
+                {
+                    $unwind: '$track.album.artist',
+                },
+                {
+                    $lookup: {
+                        from: 'profiles',
+                        localField: 'track.album.artist._id',
+                        foreignField: 'user',
+                        as: 'track.album.artist.profile',
+                    },
+                },
+                {
+                    $unwind: '$track.album.artist.profile',
                 },
                 // exclude sensitive fields
                 {
@@ -410,6 +444,10 @@ exports.getRecentlyPlayed = (userId, query) => {
                         'track.artist.passwordConfirm': 0,
                         'track.artist.refreshToken': 0,
                         'track.artist.verifyToken': 0,
+                        'track.album.artist.password': 0,
+                        'track.album.artist.passwordConfirm': 0,
+                        'track.album.artist.refreshToken': 0,
+                        'track.album.artist.verifyToken': 0,
                     },
                 },
                 {
