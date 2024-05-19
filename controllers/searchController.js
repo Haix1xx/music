@@ -10,6 +10,9 @@ exports.search = catchAsync(async (req, res, next) => {
         case 'album':
             promise = searchService.searchAlbum(q, req.query);
             break;
+        case 'playlist':
+            promise = searchService.searchPlaylist(q, req.query);
+            break;
         case 'artist':
             promise = searchService.searchArtist(q, req.query);
             break;

@@ -3,6 +3,8 @@ const AlbumModel = require('./../models/albumModel');
 const ArtistProfileModel = require('./../models/artistProfileModel');
 const AppError = require('./../utils/appError');
 const APIFeatures = require('./../utils/apiFeatures');
+const FeaturedPlaylistModel = require('./../models/featuredPlaylist');
+
 exports.search = (searchText, query) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -10,16 +12,18 @@ exports.search = (searchText, query) => {
                 return reject(new AppError('Empty search text'));
             }
 
-            const [artists, tracks, albums] = await Promise.all([
+            const [artists, tracks, albums, playlists] = await Promise.all([
                 searchArtist(searchText, query),
                 searchTrack(searchText, query),
                 searchAlbum(searchText, query),
+                searchPlaylist(searchText, query),
             ]);
 
             resolve({
                 artists: artists.artists,
                 tracks: tracks.tracks,
                 albums: albums.albums,
+                playlists: playlists.playlists,
             });
         } catch (err) {
             reject(err);
@@ -143,3 +147,36 @@ const searchArtist = (searchText, query) => {
 };
 
 exports.searchArtist = searchArtist;
+
+const searchPlaylist = (searchText, query) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!searchText) {
+                return reject(new AppError('Empty search text'));
+            }
+
+            //search albums
+            const playlistFeatures = new APIFeatures(
+                FeaturedPlaylistModel.find({
+                    title: { $regex: searchText, $options: 'i' },
+                }),
+                query
+            )
+                .sort()
+                .paginate();
+
+            const playlists = await playlistFeatures.query;
+
+            resolve({
+                playlists: playlists.map((item) => ({
+                    ...item._doc,
+                    type: 'playlist',
+                })),
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+exports.searchPlaylist = searchPlaylist;
