@@ -163,6 +163,7 @@ exports.getTracksByAlbum = (albumId) => {
                         path: 'track',
                         populate: {
                             path: 'artist',
+                            select: 'profile id _id email role',
                             populate: 'profile',
                         },
                     },
@@ -195,7 +196,11 @@ exports.getTracksByFPlaylist = (playlistId) => {
                 path: 'tracks',
                 populate: {
                     path: 'track',
-                    populate: 'artist',
+                    populate: {
+                        path: 'artist',
+                        select: 'profile id _id email role isActive',
+                        populate: 'profile',
+                    },
                 },
             });
 
