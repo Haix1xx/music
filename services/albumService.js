@@ -74,3 +74,29 @@ exports.updateTracksToAlbum = (albumId, data) => {
         });
     });
 };
+
+exports.getNewReleaseAlbums = (query) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            query.sort = '-createdAt';
+            const features = new APIFeatures(AlbumModel.find(), query)
+                .filter()
+                .sort()
+                .limitFields()
+                .paginate();
+
+            features.query = features.query.populate({
+                path: 'artist',
+                populate: 'profile',
+            });
+
+            const albums = await features.query;
+
+            resolve({
+                data: albums,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};

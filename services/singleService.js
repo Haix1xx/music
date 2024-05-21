@@ -36,3 +36,34 @@ exports.getSinglesByArtist = (artistId, query) => {
         }
     });
 };
+
+exports.getNewReleaseSingles = (query) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            query.sort = '-createdAt';
+            const features = new APIFeatures(SingleModel.find(), query)
+                .filter()
+                .sort()
+                .limitFields()
+                .paginate();
+
+            features.query = features.query.populate({
+                path: 'track',
+                populate: {
+                    path: 'artist',
+                    select: '-verifyToken -refreshToken',
+                    populate: 'profile',
+                },
+            });
+
+            const singles = await features.query;
+            console.log(singles);
+            const tracks = singles.map((item) => item.track);
+            resolve({
+                data: tracks,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};

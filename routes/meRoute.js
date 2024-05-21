@@ -13,4 +13,9 @@ router
 router
     .route('/top/tracks')
     .get(authController.protect, meController.getTopTracks);
+
+router
+    .route('/top/artists')
+    .get(authController.protect, meController.getUserTopArtists);
+
 module.exports = router;
