@@ -511,14 +511,26 @@ exports.getTopTracks = (userId, query, dateCount = 10) => {
 
             await Promise.all(
                 topTracks.map(async (item) => {
-                    item.track = await TrackModel.findById(item._id).populate({
-                        path: 'artist',
-                        select: '_id id email profile',
-                        populate: {
-                            path: 'profile',
-                            justOne: true,
-                        },
-                    });
+                    item.track = await TrackModel.findById(item._id)
+                        .populate({
+                            path: 'artist',
+                            select: '_id id email profile',
+                            populate: {
+                                path: 'profile',
+                                justOne: true,
+                            },
+                        })
+                        .populate({
+                            path: 'album',
+                            populate: {
+                                path: 'artist',
+                                select: '_id id email profile',
+                                populate: {
+                                    path: 'profile',
+                                    justOne: true,
+                                },
+                            },
+                        });
                 })
             );
             resolve({
