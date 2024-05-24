@@ -59,8 +59,12 @@ exports.getNewReleaseSingles = (query) => {
             const singles = await features.query;
             console.log(singles);
             const tracks = singles.map((item) => item.track);
+            const returnTracks = tracks.map((item) => ({
+                ...item._doc,
+                type: 'track',
+            }));
             resolve({
-                data: tracks,
+                data: returnTracks,
             });
         } catch (err) {
             reject(err);

@@ -93,7 +93,7 @@ exports.getNewReleaseAlbums = (query) => {
             const albums = await features.query;
 
             resolve({
-                data: albums,
+                data: albums.map((item) => ({ ...item._doc, type: 'album' })),
             });
         } catch (err) {
             reject(err);

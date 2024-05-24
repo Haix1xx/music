@@ -472,7 +472,7 @@ exports.getRecentlyPlayed = (userId, query) => {
 
             resolve({
                 data: populatedTracks.map((item) => ({
-                    track: item.track,
+                    track: { ...item.track, type: 'track' },
                     streamedAt: item.streamedAt,
                 })),
             });
