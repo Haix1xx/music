@@ -139,8 +139,27 @@ exports.getChart = (chartDate) => {
                     $unwind: '$artistDetails',
                 },
                 {
+                    $lookup: {
+                        from: 'profiles',
+                        localField: 'artistDetails._id',
+                        foreignField: 'user',
+                        as: 'artistProfile',
+                    },
+                },
+                {
+                    $unwind: {
+                        path: '$artistProfile',
+                        preserveNullAndEmptyArrays: true, // Use this to handle cases where a profile might not exist
+                    },
+                },
+                {
                     $addFields: {
-                        'trackDetails.artist': '$artistDetails',
+                        'trackDetails.artist': {
+                            _id: '$artistDetails._id',
+                            email: '$artistDetails.email',
+                            role: '$artistDetails.role',
+                            profile: '$artistProfile',
+                        },
                     },
                 },
                 {
