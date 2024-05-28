@@ -12,3 +12,14 @@ exports.updateChart = catchAsync(async (req, res, next) => {
         data,
     });
 });
+
+exports.getChart = catchAsync(async (req, res, next) => {
+    const chartDate = await req.params.date;
+
+    const data = await chartService.getChart(chartDate);
+
+    res.status(200).json({
+        status: 'success',
+        data,
+    });
+});

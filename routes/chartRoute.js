@@ -7,4 +7,6 @@ const router = express.Router();
 
 router.route('/').post(chartController.updateChart);
 
+router.route('/:date').get(chartController.getChart);
+
 module.exports = router;

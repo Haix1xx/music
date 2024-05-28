@@ -1,5 +1,6 @@
 const UserStreamModel = require('./../models/userStreamModel');
 const ChartModel = require('./../models/chartModel');
+const AppError = require('../utils/appError');
 exports.updateTrack = () => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -11,7 +12,7 @@ exports.updateTrack = () => {
             const year = currentDate.getFullYear();
             const startOfDay = new Date(year, month, date - 1, 0, 0, 0);
             const endOfDay = new Date(year, month, date - 1, 23, 59, 59);
-
+            console.log(startOfDay, endOfDay);
             result = await UserStreamModel.aggregate([
                 {
                     $match: {
@@ -25,7 +26,7 @@ exports.updateTrack = () => {
                     },
                 },
                 {
-                    $sort: { streams: -1 }, // Sort tracks by count in descending order
+                    $sort: { totalStreams: -1 }, // Sort tracks by count in descending order
                 },
                 {
                     $limit: 10, // Limit to the top 10 tracks
@@ -34,11 +35,11 @@ exports.updateTrack = () => {
 
             const oldChart = await ChartModel.findOne({
                 chartDate: {
-                    $gt: new Date(year, month, date - 2, 23, 59, 59),
-                    $lt: new Date(year, month, date - 1, 0, 0, 59),
+                    $gte: startOfDay,
+                    $lte: endOfDay,
                 },
             });
-
+            console.log(oldChart);
             // remove current chart
             if (oldChart) {
                 await ChartModel.findByIdAndDelete(oldChart._id);
@@ -73,6 +74,7 @@ exports.updateTrack = () => {
                     order: index,
                 }));
             }
+            console.log(trackOrder);
             const chart = await ChartModel.create({
                 chartDate: new Date(year, month, date - 1, 0, 0, 0),
                 tracks: trackOrder,
@@ -80,6 +82,95 @@ exports.updateTrack = () => {
             resolve({
                 data: chart,
             });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+exports.getChart = (chartDate) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!chartDate) {
+                return reject(new AppError('Missing chart date', 400));
+            }
+
+            const charts = await ChartModel.aggregate([
+                {
+                    $addFields: {
+                        chartDateOnly: {
+                            $dateToString: {
+                                format: '%Y-%m-%d',
+                                date: '$chartDate',
+                            },
+                        },
+                    },
+                },
+                {
+                    $match: {
+                        chartDateOnly: new Date(chartDate)
+                            .toISOString()
+                            .split('T')[0],
+                    },
+                },
+                {
+                    $unwind: '$tracks',
+                },
+                {
+                    $lookup: {
+                        from: 'tracks',
+                        localField: 'tracks.track',
+                        foreignField: '_id',
+                        as: 'trackDetails',
+                    },
+                },
+                {
+                    $unwind: '$trackDetails',
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'trackDetails.artist',
+                        foreignField: '_id',
+                        as: 'artistDetails',
+                    },
+                },
+                {
+                    $unwind: '$artistDetails',
+                },
+                {
+                    $addFields: {
+                        'trackDetails.artist': '$artistDetails',
+                    },
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        chartDate: { $first: '$chartDate' },
+                        tracks: {
+                            $push: {
+                                order: '$tracks.order',
+                                track: '$trackDetails',
+                                totalStreams: '$tracks.totalStreams',
+                                prevPosition: '$tracks.prevPosition',
+                                peak: '$tracks.peak',
+                            },
+                        },
+                    },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        chartDate: 1,
+                        tracks: 1,
+                    },
+                },
+            ]);
+
+            if (charts.length === 0) {
+                return reject(new AppError('Chart not found', 404));
+            }
+            return resolve(charts[0]);
         } catch (err) {
             reject(err);
         }
