@@ -71,7 +71,10 @@ exports.updateTrack = () => {
                         totalStreams: item.totalStreams,
                         order: index,
                         prevPosition: prevPosition,
-                        peak: Math.max(prevPosition, index),
+                        peak:
+                            prevPosition === -1
+                                ? index
+                                : Math.min(prevPosition, index),
                     };
                 });
             } else {
