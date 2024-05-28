@@ -10,11 +10,11 @@ exports.updateTrack = () => {
             const date = currentDate.getDate();
             const month = currentDate.getMonth();
             const year = currentDate.getFullYear();
-            const startOfDay = new Date(year, month, date - 1, 0, 0, 0);
-            const endOfDay = new Date(year, month, date - 1, 23, 59, 59);
+            const startOfDay = new Date(year, month, date - 0, 0, 0, 0);
+            const endOfDay = new Date(year, month, date - 0, 23, 59, 59);
 
-            const startOfPrevDay = new Date(year, month, date - 2, 0, 0, 0);
-            const endOfPrevDay = new Date(year, month, date - 2, 23, 59, 59);
+            const startOfPrevDay = new Date(year, month, date - 1, 0, 0, 0);
+            const endOfPrevDay = new Date(year, month, date - 1, 23, 59, 59);
             console.log(startOfDay, endOfDay);
             console.log(startOfPrevDay, endOfPrevDay);
             result = await UserStreamModel.aggregate([
@@ -33,7 +33,7 @@ exports.updateTrack = () => {
                     $sort: { totalStreams: -1 }, // Sort tracks by count in descending order
                 },
                 {
-                    $limit: 10, // Limit to the top 10 tracks
+                    $limit: 50, // Limit to the top 50 tracks
                 },
             ]);
 
@@ -62,14 +62,16 @@ exports.updateTrack = () => {
 
                 trackOrder = result.map((item, index) => {
                     const prevPosition = tracks.findIndex(
-                        (item) => item?.track === item._id
+                        (prevItem) =>
+                            prevItem?.track.toString() === item._id.toString()
                     );
+                    console.log(prevPosition);
                     return {
                         track: item._id,
                         totalStreams: item.totalStreams,
                         order: index,
                         prevPosition: prevPosition,
-                        peak: Math.max(prevPosition, order),
+                        peak: Math.max(prevPosition, index),
                     };
                 });
             } else {
@@ -79,9 +81,9 @@ exports.updateTrack = () => {
                     order: index,
                 }));
             }
-            console.log(trackOrder);
+            // console.log(trackOrder);
             const chart = await ChartModel.create({
-                chartDate: new Date(year, month, date - 1, 0, 0, 0),
+                chartDate: new Date(year, month, date - 0, 0, 0, 0),
                 tracks: trackOrder,
             });
             resolve({
