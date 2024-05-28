@@ -12,7 +12,11 @@ exports.updateTrack = () => {
             const year = currentDate.getFullYear();
             const startOfDay = new Date(year, month, date - 1, 0, 0, 0);
             const endOfDay = new Date(year, month, date - 1, 23, 59, 59);
+
+            const startOfPrevDay = new Date(year, month, date - 2, 0, 0, 0);
+            const endOfPrevDay = new Date(year, month, date - 2, 23, 59, 59);
             console.log(startOfDay, endOfDay);
+            console.log(startOfPrevDay, endOfPrevDay);
             result = await UserStreamModel.aggregate([
                 {
                     $match: {
@@ -47,10 +51,11 @@ exports.updateTrack = () => {
 
             const prevChart = await ChartModel.findOne({
                 chartDate: {
-                    $gt: new Date(year, month, date - 3, 23, 59, 59),
-                    $lt: new Date(year, month, date - 2, 0, 0, 59),
+                    $gte: startOfPrevDay,
+                    $lte: endOfPrevDay,
                 },
             });
+            console.log(prevChart);
             let trackOrder = [];
             if (prevChart) {
                 const { tracks } = prevChart;
