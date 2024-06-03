@@ -27,3 +27,14 @@ exports.createUserStream = (data) => {
         }
     });
 };
+
+exports.getTotalStreams = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const total = await UserStreamModel.count();
+            resolve(total);
+        } catch (err) {
+            reject(err);
+        }
+    });
+};

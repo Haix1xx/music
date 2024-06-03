@@ -562,3 +562,73 @@ exports.getArtistTopTracks = (artistId, query) => {
         }
     });
 };
+
+exports.getTotalTracks = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const total = await TrackModel.count();
+            resolve(total);
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+exports.getTopTracksOverview = (query, dateCount = 60) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const today = new Date();
+            const fromDate = new Date(today);
+            fromDate.setDate(today.getDate() - dateCount);
+            const topTracks = await UserStreamModel.aggregate([
+                {
+                    $match: {
+                        streamedAt: { $lt: today, $gte: fromDate },
+                    },
+                },
+                {
+                    $group: {
+                        _id: '$track',
+                        count: { $sum: 1 },
+                    },
+                },
+                {
+                    $sort: { count: -1 },
+                },
+                {
+                    $limit: query?.limit ? Number(query?.limit) : 10,
+                },
+            ]);
+
+            await Promise.all(
+                topTracks.map(async (item) => {
+                    item.track = await TrackModel.findById(item._id)
+                        .populate({
+                            path: 'artist',
+                            select: '_id id email profile',
+                            populate: {
+                                path: 'profile',
+                                justOne: true,
+                            },
+                        })
+                        .populate({
+                            path: 'album',
+                            populate: {
+                                path: 'artist',
+                                select: '_id id email profile',
+                                populate: {
+                                    path: 'profile',
+                                    justOne: true,
+                                },
+                            },
+                        });
+                })
+            );
+            resolve({
+                data: topTracks,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};

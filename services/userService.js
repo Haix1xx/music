@@ -15,3 +15,14 @@ exports.getUserProfile = async (userId) => {
 
     return user;
 };
+
+exports.getTotalUsers = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const total = await UserModel.find({ role: 'user' }).count();
+            resolve(total);
+        } catch (err) {
+            reject(err);
+        }
+    });
+};

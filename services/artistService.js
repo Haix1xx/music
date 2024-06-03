@@ -53,3 +53,14 @@ exports.getUserTopArtists = (userId, query) => {
         }
     });
 };
+
+exports.getTotalArtists = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const total = await ArtistProfileModel.count();
+            resolve(total);
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
