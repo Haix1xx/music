@@ -100,3 +100,14 @@ exports.getNewReleaseAlbums = (query) => {
         }
     });
 };
+
+exports.getTotalAlbumsByArtist = (artistId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const total = await AlbumModel.countDocuments({ artist: artistId });
+            resolve(total);
+        } catch (err) {
+            reject(err);
+        }
+    });
+};

@@ -566,7 +566,18 @@ exports.getArtistTopTracks = (artistId, query) => {
 exports.getTotalTracks = () => {
     return new Promise(async (resolve, reject) => {
         try {
-            const total = await TrackModel.count();
+            const total = await TrackModel.countDocuments();
+            resolve(total);
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+exports.getTotalTracksByArtist = (artistId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const total = await TrackModel.countDocuments({ artist: artistId });
             resolve(total);
         } catch (err) {
             reject(err);
