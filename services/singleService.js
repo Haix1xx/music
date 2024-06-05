@@ -71,3 +71,16 @@ exports.getNewReleaseSingles = (query) => {
         }
     });
 };
+
+exports.getTotalSinglesByArtist = (artistId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const total = await SingleModel.countDocuments({
+                artist: artistId,
+            });
+            resolve(total);
+        } catch (err) {
+            reject(err);
+        }
+    });
+};

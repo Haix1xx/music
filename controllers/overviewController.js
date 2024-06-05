@@ -3,6 +3,7 @@ const userService = require('./../services/userService');
 const artistService = require('../services/artistService');
 const userStreamService = require('../services/userStreamService');
 const albumService = require('../services/albumService');
+const singleService = require('../services/singleService');
 const catchAsync = require('./../utils/catchAsync');
 
 exports.getOverview = catchAsync(async (req, res, next) => {
@@ -29,11 +30,13 @@ exports.getTopTracks = catchAsync(async (req, res, next) => {
 
 exports.getArtistOverview = catchAsync(async (req, res, next) => {
     const artistId = req.user._id;
-    const [trackCount, albumCount, streamCount] = await Promise.all([
-        trackService.getTotalTracksByArtist(artistId),
-        albumService.getTotalAlbumsByArtist(artistId),
-        userStreamService.getTotalStreamsByArtist(artistId),
-    ]);
-    const data = { trackCount, albumCount, streamCount };
+    const [trackCount, albumCount, streamCount, singleCount] =
+        await Promise.all([
+            trackService.getTotalTracksByArtist(artistId),
+            albumService.getTotalAlbumsByArtist(artistId),
+            userStreamService.getTotalStreamsByArtist(artistId),
+            singleService.getTotalSinglesByArtist(artistId),
+        ]);
+    const data = { trackCount, albumCount, streamCount, singleCount };
     res.status(200).json({ status: 'success', data });
 });
