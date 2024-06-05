@@ -29,6 +29,8 @@ exports.getAlbumsByArtist = (artistId, query) => {
             if (!artistId) {
                 return reject(new AppError('You need to pass artist id', 403));
             }
+
+            query.sort = '-releaseDate';
             const features = new APIFeatures(
                 AlbumModel.find({ artist: artistId }).populate({
                     path: 'artist',

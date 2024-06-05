@@ -9,6 +9,7 @@ exports.getSinglesByArtist = (artistId, query) => {
                 return reject(new AppError('You need to pass artist id', 403));
             }
 
+            // query.sort = 'track.releaseDate';
             const features = new APIFeatures(
                 SingleModel.find({ artist: artistId }),
                 query
