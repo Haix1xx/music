@@ -5,6 +5,7 @@ const userStreamService = require('../services/userStreamService');
 const albumService = require('../services/albumService');
 const singleService = require('../services/singleService');
 const catchAsync = require('./../utils/catchAsync');
+const AppError = require('./../utils/appError');
 
 exports.getOverview = catchAsync(async (req, res, next) => {
     const [userCount, artistCount, streamCount, trackCount] = await Promise.all(
@@ -39,4 +40,16 @@ exports.getArtistOverview = catchAsync(async (req, res, next) => {
         ]);
     const data = { trackCount, albumCount, streamCount, singleCount };
     res.status(200).json({ status: 'success', data });
+});
+
+exports.getTopTracksByArtist = catchAsync(async (req, res, next) => {
+    const artistId = req.user._id;
+    if (!artistId) {
+        return next(new AppError('Missing Artist Id', 400));
+    }
+    const data = await trackService.getArtistTopTracks(artistId, req.query);
+    res.status(200).json({
+        status: 'success',
+        data,
+    });
 });

@@ -545,7 +545,7 @@ exports.getTopTracks = (userId, query, dateCount = 10) => {
 exports.getArtistTopTracks = (artistId, query) => {
     return new Promise(async (resolve, reject) => {
         try {
-            query.sort = 'totalStreams';
+            query.sort = '-totalStreams';
             const features = new APIFeatures(
                 TrackModel.find({ artist: artistId }),
                 query

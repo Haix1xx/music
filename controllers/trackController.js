@@ -3,6 +3,7 @@ const factory = require('./handlerFactory');
 const trackService = require('./../services/trackService');
 const catchAsync = require('./../utils/catchAsync');
 const { s3UploadFile } = require('./../utils/s3Services');
+const AppError = require('../utils/appError');
 
 exports.getAllTracks = factory.getAll(TrackModel, {
     path: 'artist',
@@ -115,6 +116,18 @@ exports.getArtistTopTrack = catchAsync(async (req, res, next) => {
         req.params.id,
         req.query
     );
+    res.status(200).json({
+        status: 'success',
+        data,
+    });
+});
+
+exports.getTopTracksByArtist = catchAsync(async (req, res, next) => {
+    const artistId = req.user._id;
+    if (!artistId) {
+        return next(new AppError('Missing Artist Id', 400));
+    }
+    const data = await trackService.getArtistTopTracks(artistId, req.query);
     res.status(200).json({
         status: 'success',
         data,

@@ -13,4 +13,8 @@ router
 
 router.route('/top-tracks').get(overviewController.getTopTracks);
 
+router
+    .route('/artists/top-tracks')
+    .get(authController.protect, overviewController.getTopTracksByArtist);
+
 module.exports = router;
