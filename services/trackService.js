@@ -547,7 +547,14 @@ exports.getArtistTopTracks = (artistId, query) => {
         try {
             query.sort = '-totalStreams';
             const features = new APIFeatures(
-                TrackModel.find({ artist: artistId }),
+                TrackModel.find({ artist: artistId }).populate({
+                    path: 'artist',
+                    select: '_id id email profile',
+                    populate: {
+                        path: 'profile',
+                        justOne: true,
+                    },
+                }),
                 query
             )
                 .sort()
