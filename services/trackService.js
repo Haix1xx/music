@@ -12,7 +12,6 @@ const { SageMakerFeatureStoreRuntime } = require('aws-sdk');
 exports.createTrack = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log(data);
             let {
                 title,
                 url,
@@ -90,7 +89,6 @@ exports.createTrack = (data) => {
                 updatedAlbum = await AlbumModel.findByIdAndUpdate(album, {
                     tracks: tracks,
                 });
-                console.log(updatedAlbum);
             } else {
                 single = await SingleModel.create({
                     track: track.id,
@@ -230,7 +228,6 @@ exports.addTrackToAbum = (data, albumId) => {
                 albumId,
                 tracks
             );
-            console.log(updatedAlbum);
             resolve({
                 data: {
                     updatedAlbum,
@@ -261,8 +258,6 @@ exports.AddTrackToPlaylist = (playlistId, data) => {
                 await FeaturedPlaylistModel.findByIdAndUpdate(playlistId, {
                     tracks: tracks,
                 });
-
-            console.log(updatedPlaylist);
 
             resolve({
                 data: updatedPlaylist,

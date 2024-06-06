@@ -15,8 +15,8 @@ exports.updateTrack = () => {
 
             const startOfPrevDay = new Date(year, month, date - 1, 0, 0, 0);
             const endOfPrevDay = new Date(year, month, date - 1, 23, 59, 59);
-            console.log(startOfDay, endOfDay);
-            console.log(startOfPrevDay, endOfPrevDay);
+            // console.log(startOfDay, endOfDay);
+            // console.log(startOfPrevDay, endOfPrevDay);
             result = await UserStreamModel.aggregate([
                 {
                     $match: {
@@ -43,7 +43,7 @@ exports.updateTrack = () => {
                     $lte: endOfDay,
                 },
             });
-            console.log(oldChart);
+            // console.log(oldChart);
             // remove current chart
             if (oldChart) {
                 await ChartModel.findByIdAndDelete(oldChart._id);

@@ -12,7 +12,7 @@ exports.updateTracksToPlaylist = (playlistId, data) => {
         if (!tracks) {
             return reject(new AppError('Tracks are empty', 403));
         }
-        console.log(tracks);
+        // console.log(tracks);
         const playlist = await FeaturedPlaylistModel.findByIdAndUpdate(
             playlistId,
             {
