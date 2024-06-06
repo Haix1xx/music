@@ -55,7 +55,6 @@ exports.updateTrack = () => {
                     $lte: endOfPrevDay,
                 },
             });
-            console.log(prevChart);
             let trackOrder = [];
             if (prevChart) {
                 const { tracks } = prevChart;
@@ -65,7 +64,6 @@ exports.updateTrack = () => {
                         (prevItem) =>
                             prevItem?.track.toString() === item._id.toString()
                     );
-                    console.log(prevPosition);
                     return {
                         track: item._id,
                         totalStreams: item.totalStreams,
@@ -74,7 +72,7 @@ exports.updateTrack = () => {
                         peak:
                             prevPosition === -1
                                 ? index
-                                : Math.min(prevPosition, index),
+                                : Math.min(tracks[prevPosition].peak, index),
                     };
                 });
             } else {
