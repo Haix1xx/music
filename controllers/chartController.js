@@ -15,9 +15,15 @@ exports.updateChart = catchAsync(async (req, res, next) => {
 
 exports.getChart = catchAsync(async (req, res, next) => {
     const chartDate = await req.params.date;
+    console.log(chartDate);
+    let chartPromise;
 
-    const data = await chartService.getChart(chartDate);
-
+    if (chartDate === 'latest') {
+        chartPromise = chartService.getLatestChart();
+    } else {
+        chartPromise = chartService.getChart(chartDate);
+    }
+    const data = await chartPromise;
     res.status(200).json({
         status: 'success',
         data,

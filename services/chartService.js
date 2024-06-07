@@ -203,3 +203,96 @@ exports.getChart = (chartDate) => {
         }
     });
 };
+
+exports.getLatestChart = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const charts = await ChartModel.aggregate([
+                {
+                    $sort: { chartDate: -1 },
+                },
+                {
+                    $limit: 1,
+                },
+                {
+                    $unwind: '$tracks',
+                },
+                {
+                    $lookup: {
+                        from: 'tracks',
+                        localField: 'tracks.track',
+                        foreignField: '_id',
+                        as: 'trackDetails',
+                    },
+                },
+                {
+                    $unwind: '$trackDetails',
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'trackDetails.artist',
+                        foreignField: '_id',
+                        as: 'artistDetails',
+                    },
+                },
+                {
+                    $unwind: '$artistDetails',
+                },
+                {
+                    $lookup: {
+                        from: 'profiles',
+                        localField: 'artistDetails._id',
+                        foreignField: 'user',
+                        as: 'artistProfile',
+                    },
+                },
+                {
+                    $unwind: {
+                        path: '$artistProfile',
+                        preserveNullAndEmptyArrays: true, // Use this to handle cases where a profile might not exist
+                    },
+                },
+                {
+                    $addFields: {
+                        'trackDetails.artist': {
+                            _id: '$artistDetails._id',
+                            email: '$artistDetails.email',
+                            role: '$artistDetails.role',
+                            profile: '$artistProfile',
+                        },
+                    },
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        chartDate: { $first: '$chartDate' },
+                        tracks: {
+                            $push: {
+                                order: '$tracks.order',
+                                track: '$trackDetails',
+                                totalStreams: '$tracks.totalStreams',
+                                prevPosition: '$tracks.prevPosition',
+                                peak: '$tracks.peak',
+                            },
+                        },
+                    },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        chartDate: 1,
+                        tracks: 1,
+                    },
+                },
+            ]);
+
+            if (charts.length === 0) {
+                return reject(new AppError('Chart not found', 404));
+            }
+            return resolve(charts[0]);
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
