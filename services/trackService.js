@@ -675,7 +675,7 @@ const searchTrackPaging = (searchText, query) => {
             console.log(data);
 
             resolve({
-                tracks: data, //tracks.map((item) => ({ ...item._doc, type: 'track' })),
+                data, //tracks.map((item) => ({ ...item._doc, type: 'track' })),
                 total,
             });
         } catch (err) {

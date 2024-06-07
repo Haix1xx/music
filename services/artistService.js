@@ -107,7 +107,7 @@ const searchArtistPaging = (searchText, query) => {
             );
 
             resolve({
-                aritsts: data, //tracks.map((item) => ({ ...item._doc, type: 'track' })),
+                data, //tracks.map((item) => ({ ...item._doc, type: 'track' })),
                 total,
             });
         } catch (err) {

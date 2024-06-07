@@ -141,7 +141,7 @@ const searchAlbumPaging = (searchText, query) => {
             console.log(data);
 
             resolve({
-                albums: data, //tracks.map((item) => ({ ...item._doc, type: 'track' })),
+                data, //tracks.map((item) => ({ ...item._doc, type: 'track' })),
                 total,
             });
         } catch (err) {
