@@ -48,7 +48,6 @@ exports.getTracksByArtist = catchAsync(async (req, res, next) => {
 exports.createTrack = catchAsync(async (req, res, next) => {
     const { track } = req.files;
     console.log(track[0]);
-    console.log(req.body);
     // const duration = await getAudioDuration(track);
     // console.log(duration);
     if (!track[0]) {

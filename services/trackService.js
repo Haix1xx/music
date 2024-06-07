@@ -652,7 +652,6 @@ const searchTrackPaging = (searchText, query) => {
             if (!searchText) {
                 return reject(new AppError('Empty search text'));
             }
-            console.log(query);
             const conditions = {
                 title: { $regex: searchText, $options: 'i' },
             };
@@ -664,7 +663,6 @@ const searchTrackPaging = (searchText, query) => {
                     justOne: true,
                 },
             };
-            console.log(conditions);
             //search tracks
             const [data, total] = await commonDAO.getAllWithPagination(
                 TrackModel,
@@ -672,7 +670,6 @@ const searchTrackPaging = (searchText, query) => {
                 popOptions,
                 conditions
             );
-            console.log(data);
 
             resolve({
                 data, //tracks.map((item) => ({ ...item._doc, type: 'track' })),

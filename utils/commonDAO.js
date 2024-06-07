@@ -4,7 +4,6 @@ const countDocuments = (Model, conditions = {}) =>
     Model.countDocuments(conditions);
 
 const getAllWithPagination = (Model, query, popOptions, conditions) => {
-    console.log(conditions);
     const features = new APIFeatures(Model.find(conditions), query)
         .sort()
         .paginate();
