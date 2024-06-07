@@ -2,6 +2,7 @@ const ArtistProfileModel = require('../models/artistProfileModel');
 const UserModel = require('../models/userModel');
 const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
+const commonDAO = require('./../utils/commonDAO');
 
 exports.getArtist = (userId) => {
     return new Promise(async (resolve, reject) => {
@@ -64,3 +65,55 @@ exports.getTotalArtists = () => {
         }
     });
 };
+
+const searchArtistPaging = (searchText, query) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!searchText) {
+                return reject(new AppError('Empty search text'));
+            }
+            //search artists
+            const regex = new RegExp(searchText, 'i');
+            const conditions = {
+                $or: [
+                    {
+                        $expr: {
+                            $regexMatch: {
+                                input: {
+                                    $concat: [
+                                        { $ifNull: ['$firstname', ''] }, // Handle potential null values
+                                        ' ',
+                                        { $ifNull: ['$lastname', ''] },
+                                    ],
+                                },
+                                regex: regex.source,
+                                options: 'i',
+                            },
+                        },
+                    },
+                    { bio: { $regex: regex } },
+                    { displayname: { $regex: regex } },
+                ],
+            };
+            const popOptions = {
+                path: 'user',
+                select: '_id id email role',
+            };
+            const [data, total] = await commonDAO.getAllWithPagination(
+                ArtistProfileModel,
+                query,
+                popOptions,
+                conditions
+            );
+
+            resolve({
+                aritsts: data, //tracks.map((item) => ({ ...item._doc, type: 'track' })),
+                total,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+exports.searchArtistPaging = searchArtistPaging;

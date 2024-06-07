@@ -7,7 +7,7 @@ const SingleModel = require('./../models/singleModel');
 const FeaturedPlaylistModel = require('./../models/featuredPlaylist');
 const UserModel = require('./../models/userModel');
 const UserStreamModel = require('./../models/userStreamModel');
-const { SageMakerFeatureStoreRuntime } = require('aws-sdk');
+const commonDAO = require('./../utils/commonDAO');
 
 exports.createTrack = (data) => {
     return new Promise(async (resolve, reject) => {
@@ -645,3 +645,43 @@ exports.getTopTracksOverview = (query, dateCount = 60) => {
         }
     });
 };
+
+const searchTrackPaging = (searchText, query) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!searchText) {
+                return reject(new AppError('Empty search text'));
+            }
+            console.log(query);
+            const conditions = {
+                title: { $regex: searchText, $options: 'i' },
+            };
+            const popOptions = {
+                path: 'artist',
+                select: '_id email profile role id',
+                populate: {
+                    path: 'profile',
+                    justOne: true,
+                },
+            };
+            console.log(conditions);
+            //search tracks
+            const [data, total] = await commonDAO.getAllWithPagination(
+                TrackModel,
+                query,
+                popOptions,
+                conditions
+            );
+            console.log(data);
+
+            resolve({
+                tracks: data, //tracks.map((item) => ({ ...item._doc, type: 'track' })),
+                total,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+exports.searchTrackPaging = searchTrackPaging;

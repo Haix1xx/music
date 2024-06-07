@@ -2,6 +2,8 @@ const searchService = require('./../services/searchService');
 const catchAsync = require('./../utils/catchAsync');
 const albumService = require('./../services/albumService');
 const singleService = require('./../services/singleService');
+const trackService = require('./../services/trackService');
+const artistService = require('./../services/artistService');
 
 exports.search = catchAsync(async (req, res, next) => {
     const { q, type } = req.query;
@@ -23,6 +25,36 @@ exports.search = catchAsync(async (req, res, next) => {
             promise = searchService.search(q, req.query);
     }
 
+    const data = await promise;
+    res.status(200).json({
+        status: 'success',
+        data: data,
+    });
+});
+
+exports.searchPaging = catchAsync(async (req, res, next) => {
+    const { q, type } = req.query;
+    let promise = undefined;
+    switch (type) {
+        case 'track':
+            promise = trackService.searchTrackPaging(q, req.query);
+            break;
+        case 'album':
+            promise = albumService.searchAlbumPaging(q, req.query);
+            break;
+        // case 'playlist':
+        //     promise = searchService.searchPlaylist(q, req.query);
+        //     break;
+        case 'artist':
+            promise = artistService.searchArtistPaging(q, req.query);
+            break;
+        default:
+            promise = searchService.search(q, req.query);
+    }
+
+    if (!promise) {
+        res.status(400).json({ status: 'fail' });
+    }
     const data = await promise;
     res.status(200).json({
         status: 'success',

@@ -1,6 +1,7 @@
 const AlbumModel = require('./../models/albumModel');
 const AppError = require('./../utils/appError');
 const APIFeatures = require('./../utils/apiFeatures');
+const commonDAO = require('./../utils/commonDAO');
 
 exports.createAlbum = (data, artistId) => {
     return new Promise(async (resolve, reject) => {
@@ -113,3 +114,40 @@ exports.getTotalAlbumsByArtist = (artistId) => {
         }
     });
 };
+
+const searchAlbumPaging = (searchText, query) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!searchText) {
+                return reject(new AppError('Empty search text'));
+            }
+            const conditions = {
+                title: { $regex: searchText, $options: 'i' },
+            };
+            const popOptions = {
+                path: 'artist',
+                select: '_id email profile role id',
+                populate: {
+                    path: 'profile',
+                    justOne: true,
+                },
+            };
+            const [data, total] = await commonDAO.getAllWithPagination(
+                AlbumModel,
+                query,
+                popOptions,
+                conditions
+            );
+            console.log(data);
+
+            resolve({
+                albums: data, //tracks.map((item) => ({ ...item._doc, type: 'track' })),
+                total,
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+exports.searchAlbumPaging = searchAlbumPaging;
