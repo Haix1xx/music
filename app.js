@@ -114,7 +114,6 @@ app.use('/api/v1/overview', overviewRouter);
 app.post('/uploadImage', upload.array('file'), async (req, res) => {
     const file = req.files[0];
     const result = await uploadImageToCloudinary(file);
-    console.log(result);
 
     res.json({ status: 'success', result });
 });
