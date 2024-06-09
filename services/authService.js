@@ -64,6 +64,15 @@ exports.login = (data) => {
             ) {
                 reject(new AppError('Incorrect email or password', 401));
             }
+
+            if (user.role === 'artist' && user.isActive === false) {
+                reject(
+                    new AppError(
+                        'Your request to be an artist has not been confirmed yet. Please waiting',
+                        401
+                    )
+                );
+            }
             if (user.isActive === false) {
                 reject(
                     new AppError(
