@@ -45,3 +45,17 @@ exports.updateRequest = catchAsync(async (req, res, next) => {
 
     res.status(200).json({ status: 'success', data });
 });
+
+exports.filterRequests = catchAsync(async (req, res, next) => {
+    const { q, status } = req.body;
+    const limit = req.body?.limit ?? 10;
+    const page = req.body?.page ?? 1;
+    const data = await artistRequestService.filterRequests(
+        q,
+        status,
+        limit,
+        page
+    );
+
+    res.status(200).json({ status: 'success', data });
+});

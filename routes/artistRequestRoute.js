@@ -12,6 +12,7 @@ router
         authController.restrictTo('admin'),
         artistRequestController.getAllRequests
     )
+    .post(artistRequestController.filterRequests)
     .put(
         authController.protect,
         authController.restrictTo('admin'),
