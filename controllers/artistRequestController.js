@@ -43,5 +43,5 @@ exports.updateRequest = catchAsync(async (req, res, next) => {
         data = await artistRequestService.approveRequest(id);
     }
 
-    res.status(200).json(data);
+    res.status(200).json({ status: 'success', data });
 });
