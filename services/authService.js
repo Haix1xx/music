@@ -3,6 +3,7 @@ const ProfileModel = require('../models/profileModel');
 const ArtistProfileModel = require('./../models/artistProfileModel');
 const AppError = require('../utils/appError');
 const crypto = require('crypto');
+const artistRequestService = require('./artistRequestService');
 
 exports.signup = (data) => {
     return new Promise(async (resolve, reject) => {
@@ -139,6 +140,7 @@ exports.artistSignUp = (data) => {
                     passwordConfirm: data.passwordConfirm,
                     role: 'artist',
                     verifyToken: verifyToken,
+                    isActive: false,
                 });
 
                 let { displayname } = data;
@@ -156,6 +158,11 @@ exports.artistSignUp = (data) => {
                     user: user.id,
                     displayname: displayname,
                 });
+
+                const request = await artistRequestService.createRequest(
+                    user._id
+                );
+                console.log(request);
                 // const url = `${process.env.CLIENT_URL}/verify/${user._id}/${verifyToken}`;
                 // await sendEmail(user.email, 'Email Verification', url);
                 resolve(artistProfile);
