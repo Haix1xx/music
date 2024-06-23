@@ -2,6 +2,7 @@ const catchAsync = require('../utils/catchAsync');
 const ArtistRequestModel = require('./../models/artistRequestModel');
 const factory = require('./handlerFactory');
 const artistRequestService = require('./../services/artistRequestService');
+const userService = require('./../services/userService');
 
 exports.getAllRequests = factory.getAll(ArtistRequestModel, {
     path: 'artist',
@@ -37,13 +38,16 @@ exports.updateRequest = catchAsync(async (req, res, next) => {
     const { type, id } = req.body;
 
     let data;
+    let artist;
     if (type === 'reject') {
         data = await artistRequestService.rejectRequest(id);
+        artist = await userService.lockOrUnlockUser(data.data.artist, false);
     } else {
         data = await artistRequestService.approveRequest(id);
+        artist = await userService.lockOrUnlockUser(data.data.artist, true);
     }
 
-    res.status(200).json({ status: 'success', data });
+    res.status(200).json({ status: 'success', data, artist });
 });
 
 exports.filterRequests = catchAsync(async (req, res, next) => {
