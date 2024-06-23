@@ -16,6 +16,13 @@ router.get('/refresh', authController.refreshToken);
 // Protect all routes after this middleware
 router.post('/artists/signup', authController.artistSignup);
 
+router.put(
+    '/lock',
+    authController.protect,
+    authController.restrictTo('admin'),
+    userController.lockUser
+);
+
 router.route('/').get(userController.getAllUsers);
 
 router
